@@ -1,0 +1,2 @@
+# gemini
+Gemini programming  freely
