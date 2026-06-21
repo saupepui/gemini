@@ -3,26 +3,26 @@ import subprocess
 import os
 import time
 from google.api_core.exceptions import ResourceExhausted
-import time
-import os
 
-# 1. Configuración
+# ==========================================
+# 1. CONFIGURACIÓN
+# ==========================================
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 # ==========================================
 # 2. HERRAMIENTAS (Sin decoradores)
 # ==========================================
-
 def ejecutar_comando_bash(comando: str) -> str:
     print(f"\n[🔧 Bash]: {comando}")
     try:
-        result = subprocess.run(comando, shell=True, capture_output=True, text=True, timeout=90)
+        # Aumentado a 180s para que npm/Astro tengan tiempo de instalarse
+        result = subprocess.run(comando, shell=True, capture_output=True, text=True, timeout=180)
         return f"Salida:\n{result.stdout}\nError:\n{result.stderr}" if result.returncode == 0 else f"Error (Código {result.returncode}):\n{result.stderr}"
     except Exception as e:
         return f"Excepción: {str(e)}"
 
 def escribir_archivo(ruta: str, contenido: str) -> str:
-    print(f"\n[📝 Crear/Sobrescribir Archivo]: {ruta}")
+    print(f"\n[📝 Escribir Archivo]: {ruta}")
     try:
         os.makedirs(os.path.dirname(ruta) if os.path.dirname(ruta) else '.', exist_ok=True)
         with open(ruta, 'w', encoding='utf-8') as f:
@@ -42,7 +42,7 @@ def leer_archivo(ruta: str) -> str:
 def ver_estructura_proyecto(directorio: str = ".") -> str:
     print(f"\n[📂 Ver Estructura]: {directorio}")
     resultado = []
-    ignorar = {'.git', '__pycache__', 'venv', '.venv'}
+    ignorar = {'.git', '__pycache__', 'venv', 'node_modules', 'dist'}
     for raiz, dirs, archivos in os.walk(directorio):
         dirs[:] = [d for d in dirs if d not in ignorar]
         nivel = raiz.replace(directorio, '').count(os.sep)
@@ -69,7 +69,7 @@ def reemplazar_en_archivo(ruta: str, texto_antiguo: str, texto_nuevo: str) -> st
 def buscar_texto_en_proyecto(termino: str, directorio: str = ".") -> str:
     print(f"\n[🔍 Buscar Texto]: '{termino}'")
     coincidencias = []
-    ignorar_dirs = {'.git', '__pycache__', 'venv'}
+    ignorar_dirs = {'.git', '__pycache__', 'venv', 'node_modules'}
     for raiz, dirs, archivos in os.walk(directorio):
         dirs[:] = [d for d in dirs if d not in ignorar_dirs]
         for archivo in archivos:
@@ -82,7 +82,6 @@ def buscar_texto_en_proyecto(termino: str, directorio: str = ".") -> str:
             except: continue
     return "\n".join(coincidencias) if coincidencias else f"No hay coincidencias para '{termino}'."
 
-# Mapeamos los nombres de las funciones a sus referencias en memoria
 mapa_funciones = {
     "ejecutar_comando_bash": ejecutar_comando_bash,
     "escribir_archivo": escribir_archivo,
@@ -93,32 +92,36 @@ mapa_funciones = {
 }
 
 # ==========================================
-# 3. CONFIGURACIÓN DEL SISTEMA DE RESPALDO (CASCADING FALLBACK)
+# 3. CONFIGURACIÓN DEL SISTEMA IA (DINÁMICO)
 # ==========================================
-
 instrucciones = (
     "Eres un ingeniero de software senior autónomo operando en un contenedor Linux.\n"
     "Cuentas con herramientas para interactuar con el entorno.\n"
-    "PROTOCOLO DE INTEGRACIÓN CONTINUA (GIT):\n"
-    "  a) Desarrolla el código.\n"
-    "  b) Pruébalo usando tu herramienta bash para asegurar que funciona.\n"
-    "  c) Si funciona, ejecuta: 'git add .', 'git commit -m \"feat: mensaje\"', y 'git push'.\n"
-    "Piensa paso a paso."
+    "PROTOCOLO DE TRABAJO:\n"
+    "  1) Analiza la tarea solicitada.\n"
+    "  2) Usa bash o escribe archivos según necesites.\n"
+    "  3) Verifica con bash si compila o hay errores.\n"
+    "  4) Usa git add, commit y push al terminar.\n"
+    "Piensa paso a paso y sé conciso."
 )
 
-# Lista de modelos ordenados para el "escuadrón de relevo"
-MODELOS_DISPONIBLES = [
-    'models/gemini-3.5-flash',
-    'models/gemini-2.5-flash',
-    'models/gemini-2.0-flash',
-    'models/gemini-2.5-pro',
-    'models/gemini-pro-latest'
-]
+print("🔍 Consultando a los servidores de Google tu arsenal de modelos...")
+MODELOS_DISPONIBLES = []
+try:
+    for m in genai.list_models():
+        nombre = m.name.lower()
+        if 'generatecontent' in [metodo.lower() for metodo in m.supported_generation_methods] and 'gemini' in nombre:
+            # Filtro vital: Excluir modelos que solo devuelven audio o fallan en texto
+            if 'tts' not in nombre and 'audio' not in nombre:
+                MODELOS_DISPONIBLES.append(m.name)
+    print(f"✅ ¡Arsenal cargado! Tienes {len(MODELOS_DISPONIBLES)} modelos de texto listos para el relevo.")
+except Exception as e:
+    print(f"❌ Error al consultar modelos: {e}")
+    MODELOS_DISPONIBLES = ['models/gemini-2.0-flash', 'models/gemini-1.5-flash']
 
 modelo_actual_idx = 0
 
 def crear_chat(idx, historial=[]):
-    """Inicializa un modelo específico e inyecta el historial anterior."""
     nombre_modelo = MODELOS_DISPONIBLES[idx]
     print(f"\n🔄 [Sistema] Conectando 'cerebro' al modelo: {nombre_modelo}...")
     model = genai.GenerativeModel(
@@ -126,53 +129,42 @@ def crear_chat(idx, historial=[]):
         tools=list(mapa_funciones.values()),
         system_instruction=instrucciones
     )
-    # Al pasarle el historial, el nuevo modelo no pierde el contexto de la tarea
     return model.start_chat(history=historial)
 
-# Inicializamos el primer chat
 chat = crear_chat(modelo_actual_idx)
 
+# ==========================================
+# 4. MOTOR PRINCIPAL (BACKLOG INFINITO)
+# ==========================================
 print("================================================================")
-print("🤖 Super Agente Autónomo (Modo Respaldo en Cascada) Iniciado.")
-print("Escribe 'salir' para terminar el programa.")
-print("================================================================\n")
-
-while True:
-    print("================================================================")
 print("🤖 Super Agente Autónomo (Modo BACKLOG INFINITO) Iniciado.")
 print("Leyendo tareas de 'backlog.txt'...")
 print("================================================================\n")
 
-# Archivo de entrada y archivo de registro de completadas
 ARCHIVO_BACKLOG = "backlog.txt"
 ARCHIVO_COMPLETADAS = "tareas_completadas.txt"
 
-# Aseguramos que los archivos existan
 if not os.path.exists(ARCHIVO_BACKLOG):
     open(ARCHIVO_BACKLOG, 'w').close()
 if not os.path.exists(ARCHIVO_COMPLETADAS):
     open(ARCHIVO_COMPLETADAS, 'w').close()
 
 while True:
-    # 1. Leemos el backlog
     with open(ARCHIVO_BACKLOG, 'r', encoding='utf-8') as f:
         lineas = f.readlines()
     
-    # Filtramos líneas vacías
     tareas_pendientes = [linea.strip() for linea in lineas if linea.strip()]
     
     if not tareas_pendientes:
-        print("\n💤 No hay tareas en 'backlog.txt'. Esperando 60 segundos antes de volver a mirar...")
-        time.sleep(60)
+        print("\n💤 No hay tareas en 'backlog.txt'. Esperando 30 segundos antes de volver a mirar...")
+        time.sleep(30)
         continue
         
-    # Tomamos la primera tarea de la lista
     tarea_actual = tareas_pendientes[0]
-    print(f"\n================================================================")
-    print(f"🚀 INICIANDO NUEVA TAREA: {tarea_actual}")
-    print(f"================================================================\n")
+    print(f"\n" + "="*64)
+    print(f"🚀 INICIANDO NUEVA TAREA: {tarea_actual[:100]}...")
+    print("="*64 + "\n")
     
-    # --- AQUI EMPIEZA EL BUCLE DE RESPALDO EN CASCADA QUE YA TENÍAMOS ---
     reintentar_tarea = True
     mensaje_a_enviar = tarea_actual 
     
@@ -196,6 +188,9 @@ while True:
                     argumentos = {k: v for k, v in tool_call.args.items()}
                     resultado_real = mapa_funciones[nombre_func](**argumentos)
                     
+                    # --- AÑADE ESTA LÍNEA AQUÍ ---
+                    print(f"   ↳ [Resultado]: {str(resultado_real)[:300]}...")
+
                     respuestas_herramientas.append({
                         "function_response": {
                             "name": nombre_func,
@@ -203,8 +198,8 @@ while True:
                         }
                     })
                 
-                print("⏳ Control manual: Pausa de 10 segundos para cuidar la red...")
-                time.sleep(10)
+                print("⏳ Control manual: Pausa de 30 segundos para cuidar la red...")
+                time.sleep(30)
                 
                 mensaje_a_enviar = respuestas_herramientas
                 response = chat.send_message(mensaje_a_enviar)
@@ -218,17 +213,13 @@ while True:
             print(f"\n🤖 Reporte Final de la Tarea:\n{mensaje_final}")
             reintentar_tarea = False 
             
-            # --- TAREA COMPLETADA CON ÉXITO ---
-            # 1. Guardamos la tarea en el registro de completadas
             with open(ARCHIVO_COMPLETADAS, 'a', encoding='utf-8') as f:
                 f.write(tarea_actual + "\n")
                 
-            # 2. La borramos del backlog (reescribiendo el archivo sin la primera línea)
             with open(ARCHIVO_BACKLOG, 'w', encoding='utf-8') as f:
                 f.writelines([linea + "\n" for linea in tareas_pendientes[1:]])
                 
-            print("\n✅ Tarea tachada del backlog. Limpiando el historial de memoria para el siguiente proyecto...")
-            # IMPORTANTE: Reiniciamos el chat para vaciar el contexto y no arrastrar código viejo
+            print("\n✅ Tarea tachada del backlog. Limpiando el historial de memoria para el siguiente paso...")
             chat = crear_chat(modelo_actual_idx, historial=[]) 
             
         except ResourceExhausted:
@@ -242,9 +233,14 @@ while True:
             
         except Exception as e:
             print(f"\n❌ Ocurrió un error inesperado: {e}")
-            print("Saltando esta tarea problemática para no detener la fábrica...")
-            # Si falla de forma crítica, la borramos del backlog para no bloquear la cola infinita
-            with open(ARCHIVO_BACKLOG, 'w', encoding='utf-8') as f:
-                f.writelines([linea + "\n" for linea in tareas_pendientes[1:]])
+            # Blindaje total contra errores de servidor y modalidades de la API
+            error_str = str(e).lower()
+            if "404" in error_str or "400" in error_str or "api" in error_str or "modalities" in error_str:
+                print("🚨 Error crítico de la API de Google. Deteniendo la fábrica para salvar el backlog.")
+                exit(1) 
+            else:
+                print("Saltando esta tarea problemática para no detener la fábrica...")
+                with open(ARCHIVO_BACKLOG, 'w', encoding='utf-8') as f:
+                    f.writelines([linea + "\n" for linea in tareas_pendientes[1:]])
             reintentar_tarea = False 
-            chat = crear_chat(modelo_actual_idx, historial=[]) # Limpiamos memoria
+            chat = crear_chat(modelo_actual_idx, historial=[])
