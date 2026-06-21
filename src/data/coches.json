@@ -94,5 +94,165 @@
     "bateria_util_kwh": 58.0,
     "consumo_medio_kwh_100km": 15.5,
     "potencia_carga_dc_max_kw": 120
+  },
+  {
+    "id": "audi-q4-e-tron",
+    "marca": "Audi",
+    "modelo": "Q4 e-tron",
+    "bateria_util_kwh": 77.0,
+    "consumo_medio_kwh_100km": 17.5,
+    "potencia_carga_dc_max_kw": 135
+  },
+  {
+    "id": "audi-q8-e-tron",
+    "marca": "Audi",
+    "modelo": "Q8 e-tron",
+    "bateria_util_kwh": 106.0,
+    "consumo_medio_kwh_100km": 20.1,
+    "potencia_carga_dc_max_kw": 170
+  },
+  {
+    "id": "bmw-i4",
+    "marca": "BMW",
+    "modelo": "i4",
+    "bateria_util_kwh": 80.7,
+    "consumo_medio_kwh_100km": 16.0,
+    "potencia_carga_dc_max_kw": 205
+  },
+  {
+    "id": "bmw-ix3",
+    "marca": "BMW",
+    "modelo": "iX3",
+    "bateria_util_kwh": 74.0,
+    "consumo_medio_kwh_100km": 18.5,
+    "potencia_carga_dc_max_kw": 150
+  },
+  {
+    "id": "bmw-ix",
+    "marca": "BMW",
+    "modelo": "iX",
+    "bateria_util_kwh": 105.2,
+    "consumo_medio_kwh_100km": 19.5,
+    "potencia_carga_dc_max_kw": 195
+  },
+  {
+    "id": "citroen-e-c4",
+    "marca": "Citroën",
+    "modelo": "ë-C4",
+    "bateria_util_kwh": 50.8,
+    "consumo_medio_kwh_100km": 15.0,
+    "potencia_carga_dc_max_kw": 100
+  },
+  {
+    "id": "ford-mustang-mach-e",
+    "marca": "Ford",
+    "modelo": "Mustang Mach-E",
+    "bateria_util_kwh": 91.0,
+    "consumo_medio_kwh_100km": 17.3,
+    "potencia_carga_dc_max_kw": 150
+  },
+  {
+    "id": "mercedes-eqa",
+    "marca": "Mercedes-Benz",
+    "modelo": "EQA",
+    "bateria_util_kwh": 66.5,
+    "consumo_medio_kwh_100km": 16.0,
+    "potencia_carga_dc_max_kw": 100
+  },
+  {
+    "id": "mercedes-eqb",
+    "marca": "Mercedes-Benz",
+    "modelo": "EQB",
+    "bateria_util_kwh": 66.5,
+    "consumo_medio_kwh_100km": 16.5,
+    "potencia_carga_dc_max_kw": 100
+  },
+  {
+    "id": "mercedes-eqe",
+    "marca": "Mercedes-Benz",
+    "modelo": "EQE",
+    "bateria_util_kwh": 90.6,
+    "consumo_medio_kwh_100km": 15.5,
+    "potencia_carga_dc_max_kw": 170
+  },
+  {
+    "id": "nissan-ariya",
+    "marca": "Nissan",
+    "modelo": "Ariya",
+    "bateria_util_kwh": 87.0,
+    "consumo_medio_kwh_100km": 18.2,
+    "potencia_carga_dc_max_kw": 130
+  },
+  {
+    "id": "nissan-leaf",
+    "marca": "Nissan",
+    "modelo": "Leaf",
+    "bateria_util_kwh": 59.0,
+    "consumo_medio_kwh_100km": 18.0,
+    "potencia_carga_dc_max_kw": 50
+  },
+  {
+    "id": "opel-corsa-electric",
+    "marca": "Opel",
+    "modelo": "Corsa-e",
+    "bateria_util_kwh": 51.0,
+    "consumo_medio_kwh_100km": 14.5,
+    "potencia_carga_dc_max_kw": 100
+  },
+  {
+    "id": "polestar-2",
+    "marca": "Polestar",
+    "modelo": "2",
+    "bateria_util_kwh": 78.0,
+    "consumo_medio_kwh_100km": 17.0,
+    "potencia_carga_dc_max_kw": 205
+  },
+  {
+    "id": "porsche-taycan",
+    "marca": "Porsche",
+    "modelo": "Taycan",
+    "bateria_util_kwh": 89.0,
+    "consumo_medio_kwh_100km": 20.0,
+    "potencia_carga_dc_max_kw": 270
+  },
+  {
+    "id": "skoda-enyaq-iv",
+    "marca": "Skoda",
+    "modelo": "Enyaq iV",
+    "bateria_util_kwh": 77.0,
+    "consumo_medio_kwh_100km": 16.0,
+    "potencia_carga_dc_max_kw": 135
+  },
+  {
+    "id": "volvo-ex30",
+    "marca": "Volvo",
+    "modelo": "EX30",
+    "bateria_util_kwh": 64.0,
+    "consumo_medio_kwh_100km": 15.7,
+    "potencia_carga_dc_max_kw": 153
+  },
+  {
+    "id": "volvo-xc40-recharge",
+    "marca": "Volvo",
+    "modelo": "XC40 Recharge",
+    "bateria_util_kwh": 78.0,
+    "consumo_medio_kwh_100km": 18.5,
+    "potencia_carga_dc_max_kw": 150
+  },
+  {
+    "id": "smart-1",
+    "marca": "Smart",
+    "modelo": "#1",
+    "bateria_util_kwh": 62.0,
+    "consumo_medio_kwh_100km": 16.5,
+    "potencia_carga_dc_max_kw": 150
+  },
+  {
+    "id": "byd-dolphin",
+    "marca": "BYD",
+    "modelo": "Dolphin",
+    "bateria_util_kwh": 60.4,
+    "consumo_medio_kwh_100km": 15.9,
+    "potencia_carga_dc_max_kw": 88
   }
 ]
