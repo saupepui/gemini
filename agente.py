@@ -3,6 +3,8 @@ import subprocess
 import os
 import time
 from google.api_core.exceptions import ResourceExhausted
+import time
+import os
 
 # 1. Configuración
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
@@ -136,21 +138,49 @@ print("Escribe 'salir' para terminar el programa.")
 print("================================================================\n")
 
 while True:
-    user_input = input("\nTú (Jefe de Proyecto): ")
-    if user_input.lower() in ['salir', 'exit', 'quit']:
-        break
+    print("================================================================")
+print("🤖 Super Agente Autónomo (Modo BACKLOG INFINITO) Iniciado.")
+print("Leyendo tareas de 'backlog.txt'...")
+print("================================================================\n")
+
+# Archivo de entrada y archivo de registro de completadas
+ARCHIVO_BACKLOG = "backlog.txt"
+ARCHIVO_COMPLETADAS = "tareas_completadas.txt"
+
+# Aseguramos que los archivos existan
+if not os.path.exists(ARCHIVO_BACKLOG):
+    open(ARCHIVO_BACKLOG, 'w').close()
+if not os.path.exists(ARCHIVO_COMPLETADAS):
+    open(ARCHIVO_COMPLETADAS, 'w').close()
+
+while True:
+    # 1. Leemos el backlog
+    with open(ARCHIVO_BACKLOG, 'r', encoding='utf-8') as f:
+        lineas = f.readlines()
     
+    # Filtramos líneas vacías
+    tareas_pendientes = [linea.strip() for linea in lineas if linea.strip()]
+    
+    if not tareas_pendientes:
+        print("\n💤 No hay tareas en 'backlog.txt'. Esperando 60 segundos antes de volver a mirar...")
+        time.sleep(60)
+        continue
+        
+    # Tomamos la primera tarea de la lista
+    tarea_actual = tareas_pendientes[0]
+    print(f"\n================================================================")
+    print(f"🚀 INICIANDO NUEVA TAREA: {tarea_actual}")
+    print(f"================================================================\n")
+    
+    # --- AQUI EMPIEZA EL BUCLE DE RESPALDO EN CASCADA QUE YA TENÍAMOS ---
     reintentar_tarea = True
-    mensaje_a_enviar = user_input # Puede ser texto o los resultados de una función
+    mensaje_a_enviar = tarea_actual 
     
     while reintentar_tarea:
         try:
-            print(f"\n[{MODELOS_DISPONIBLES[modelo_actual_idx]}] está analizando el plan...")
-            
-            # 1. Enviamos el mensaje
+            print(f"[{MODELOS_DISPONIBLES[modelo_actual_idx]}] está analizando el plan...")
             response = chat.send_message(mensaje_a_enviar)
             
-            # Función auxiliar para extraer llamadas (el SDK de Google las esconde en 'parts')
             def extraer_llamadas(resp):
                 try:
                     return [part.function_call for part in resp.candidates[0].content.parts if part.function_call]
@@ -159,19 +189,13 @@ while True:
                     
             llamadas = extraer_llamadas(response)
             
-            # 2. Bucle de interceptación de herramientas
             while llamadas:
                 respuestas_herramientas = []
-                
                 for tool_call in llamadas:
                     nombre_func = tool_call.name
-                    # Convertimos los argumentos (que vienen en formato Protobuf) a un diccionario de Python
                     argumentos = {k: v for k, v in tool_call.args.items()}
-                    
-                    # Ejecutamos la función de la herramienta
                     resultado_real = mapa_funciones[nombre_func](**argumentos)
                     
-                    # Estructura estricta que exige Google para devolver la respuesta
                     respuestas_herramientas.append({
                         "function_response": {
                             "name": nombre_func,
@@ -182,34 +206,45 @@ while True:
                 print("⏳ Control manual: Pausa de 10 segundos para cuidar la red...")
                 time.sleep(10)
                 
-                # Actualizamos el mensaje para la siguiente iteración
                 mensaje_a_enviar = respuestas_herramientas
                 response = chat.send_message(mensaje_a_enviar)
                 llamadas = extraer_llamadas(response)
                 
-            # Si el bucle termina, la IA nos habló en texto normal
-            print(f"\n🤖 Reporte Final:\n{response.text}")
-            reintentar_tarea = False # Salimos del bucle de reintento con éxito
+            try:
+                mensaje_final = response.text
+            except Exception:
+                mensaje_final = "(El agente completó la tarea en silencio)."
+                
+            print(f"\n🤖 Reporte Final de la Tarea:\n{mensaje_final}")
+            reintentar_tarea = False 
+            
+            # --- TAREA COMPLETADA CON ÉXITO ---
+            # 1. Guardamos la tarea en el registro de completadas
+            with open(ARCHIVO_COMPLETADAS, 'a', encoding='utf-8') as f:
+                f.write(tarea_actual + "\n")
+                
+            # 2. La borramos del backlog (reescribiendo el archivo sin la primera línea)
+            with open(ARCHIVO_BACKLOG, 'w', encoding='utf-8') as f:
+                f.writelines([linea + "\n" for linea in tareas_pendientes[1:]])
+                
+            print("\n✅ Tarea tachada del backlog. Limpiando el historial de memoria para el siguiente proyecto...")
+            # IMPORTANTE: Reiniciamos el chat para vaciar el contexto y no arrastrar código viejo
+            chat = crear_chat(modelo_actual_idx, historial=[]) 
             
         except ResourceExhausted:
-            print(f"\n❌ [Alerta 429] Cuota agotada para el modelo actual.")
-            
-            # Pasamos al siguiente modelo
+            print(f"\n❌ [Alerta 429] Cuota agotada para {MODELOS_DISPONIBLES[modelo_actual_idx]}.")
             modelo_actual_idx += 1
-            
             if modelo_actual_idx >= len(MODELOS_DISPONIBLES):
-                print("🚨 ¡Alerta Crítica! Se han agotado todos los modelos del escuadrón.")
-                print("Pausa obligatoria de 2 minutos para reiniciar cuotas de los servidores...")
+                print("🚨 Todos los modelos agotados. Pausa de 2 minutos...")
                 time.sleep(120)
                 modelo_actual_idx = 0 
-            
-            # Rescatamos el historial y creamos el nuevo chat
-            historial_rescatado = chat.history if chat else []
-            chat = crear_chat(modelo_actual_idx, historial_rescatado)
-            
-            print("🔄 Reintentando exactamente donde nos quedamos...")
-            # Al no cambiar 'reintentar_tarea', el bucle repite la iteración principal
+            chat = crear_chat(modelo_actual_idx, chat.history if chat else [])
             
         except Exception as e:
-            print(f"\n❌ Ocurrió un error inesperado (no es de cuota): {e}")
-            reintentar_tarea = False # Rompemos el bucle si es un error crítico    
+            print(f"\n❌ Ocurrió un error inesperado: {e}")
+            print("Saltando esta tarea problemática para no detener la fábrica...")
+            # Si falla de forma crítica, la borramos del backlog para no bloquear la cola infinita
+            with open(ARCHIVO_BACKLOG, 'w', encoding='utf-8') as f:
+                f.writelines([linea + "\n" for linea in tareas_pendientes[1:]])
+            reintentar_tarea = False 
+            chat = crear_chat(modelo_actual_idx, historial=[]) # Limpiamos memoria
