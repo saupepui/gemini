@@ -14,5 +14,85 @@
     "bateria_util_kwh": 26.8,
     "consumo_medio_kwh_100km": 13.9,
     "potencia_carga_dc_max_kw": 30
+  },
+  {
+    "id": "tesla-model-y",
+    "marca": "Tesla",
+    "modelo": "Model Y",
+    "bateria_util_kwh": 75.0,
+    "consumo_medio_kwh_100km": 16.9,
+    "potencia_carga_dc_max_kw": 250
+  },
+  {
+    "id": "mg-4",
+    "marca": "MG",
+    "modelo": "4",
+    "bateria_util_kwh": 51.0,
+    "consumo_medio_kwh_100km": 17.0,
+    "potencia_carga_dc_max_kw": 117
+  },
+  {
+    "id": "hyundai-kona-electrico",
+    "marca": "Hyundai",
+    "modelo": "Kona Eléctrico",
+    "bateria_util_kwh": 65.4,
+    "consumo_medio_kwh_100km": 14.7,
+    "potencia_carga_dc_max_kw": 102
+  },
+  {
+    "id": "kia-niro-ev",
+    "marca": "Kia",
+    "modelo": "Niro EV",
+    "bateria_util_kwh": 64.8,
+    "consumo_medio_kwh_100km": 16.2,
+    "potencia_carga_dc_max_kw": 72
+  },
+  {
+    "id": "byd-atto-3",
+    "marca": "BYD",
+    "modelo": "Atto 3",
+    "bateria_util_kwh": 60.4,
+    "consumo_medio_kwh_100km": 16.0,
+    "potencia_carga_dc_max_kw": 88
+  },
+  {
+    "id": "renault-megane-e-tech",
+    "marca": "Renault",
+    "modelo": "Megane E-Tech",
+    "bateria_util_kwh": 60.0,
+    "consumo_medio_kwh_100km": 16.1,
+    "potencia_carga_dc_max_kw": 130
+  },
+  {
+    "id": "volkswagen-id-4",
+    "marca": "Volkswagen",
+    "modelo": "ID.4",
+    "bateria_util_kwh": 77.0,
+    "consumo_medio_kwh_100km": 16.3,
+    "potencia_carga_dc_max_kw": 135
+  },
+  {
+    "id": "fiat-500e",
+    "marca": "Fiat",
+    "modelo": "500e",
+    "bateria_util_kwh": 37.3,
+    "consumo_medio_kwh_100km": 13.0,
+    "potencia_carga_dc_max_kw": 85
+  },
+  {
+    "id": "peugeot-e-208",
+    "marca": "Peugeot",
+    "modelo": "e-208",
+    "bateria_util_kwh": 51.0,
+    "consumo_medio_kwh_100km": 14.0,
+    "potencia_carga_dc_max_kw": 100
+  },
+  {
+    "id": "cupra-born",
+    "marca": "Cupra",
+    "modelo": "Born",
+    "bateria_util_kwh": 58.0,
+    "consumo_medio_kwh_100km": 15.5,
+    "potencia_carga_dc_max_kw": 120
   }
 ]
