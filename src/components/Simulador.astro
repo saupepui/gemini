@@ -1,0 +1,50 @@
+---
+// src/components/Simulador.astro
+const { coche } = Astro.props;
+---
+
+<div class="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto">
+  <h2 class="text-xl font-bold mb-4">Simulador de Carga</h2>
+  
+  <div class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Precio del kWh (€)</label>
+      <input type="number" id="precioKwh" value="0.15" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
+    </div>
+    
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Potencia de carga doméstica (kW)</label>
+      <input type="number" id="potenciaCarga" value="7.4" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
+    </div>
+  </div>
+
+  <div class="mt-6 border-t pt-4">
+    <p class="text-lg">Coste por 100km: <span id="resultadoCoste" class="font-bold text-indigo-600">--</span> €</p>
+    <p class="text-lg">Tiempo de carga 0-100%: <span id="resultadoTiempo" class="font-bold text-indigo-600">--</span> horas</p>
+  </div>
+</div>
+
+<script define:vars={{ coche }}>
+  import { calcularCoste100km, calcularTiempoDomestica } from '../utils/calculadoras.js';
+
+  const inputPrecio = document.getElementById('precioKwh');
+  const inputPotencia = document.getElementById('potenciaCarga');
+  const elCoste = document.getElementById('resultadoCoste');
+  const elTiempo = document.getElementById('resultadoTiempo');
+
+  function actualizar() {
+    const precio = parseFloat(inputPrecio.value) || 0;
+    const potencia = parseFloat(inputPotencia.value) || 1;
+
+    const coste = calcularCoste100km(coche.consumo, precio);
+    const tiempo = calcularTiempoDomestica(coche.bateria, potencia);
+
+    elCoste.textContent = coste.toFixed(2);
+    elTiempo.textContent = tiempo.toFixed(1);
+  }
+
+  [inputPrecio, inputPotencia].forEach(el => el.addEventListener('input', actualizar));
+  
+  // Calcular inicial
+  actualizar();
+</script>
