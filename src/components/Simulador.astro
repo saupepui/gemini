@@ -4,9 +4,7 @@ const { coche } = Astro.props;
 ---
 
 <div id="simulador"
-     class="bg-white rounded-lg shadow-xl p-8 max-w-lg mx-auto my-10 border border-gray-200 text-gray-800"
-     data-bateria={coche.bateria_util_kwh}
-     data-consumo={coche.consumo_medio_kwh_100km}>
+     class="bg-white rounded-lg shadow-xl p-8 max-w-lg mx-auto my-10 border border-gray-200 text-gray-800">
   <h2 class="text-3xl font-extrabold mb-6 text-center text-indigo-700">Simulador de Carga</h2>
 
   <div class="space-y-6">
@@ -29,33 +27,25 @@ const { coche } = Astro.props;
   </div>
 </div>
 
-<script>
-  const simuladorDiv = document.getElementById('simulador');
-  const bateria = parseFloat(simuladorDiv.getAttribute('data-bateria')) || 0;
-  const consumo = parseFloat(simuladorDiv.getAttribute('data-consumo')) || 0;
-
-  const inputPrecio = document.getElementById('precioKwh') as HTMLInputElement;
-  const inputPotencia = document.getElementById('potenciaCarga') as HTMLInputElement;
+<script define:vars={{ bateria: coche.bateria, consumo: coche.consumo }}>
+  const inputPrecio = document.getElementById('precioKwh');
+  const inputPotencia = document.getElementById('potenciaCarga');
   const elCoste = document.getElementById('resultadoCoste');
   const elTiempo = document.getElementById('resultadoTiempo');
-
-  const calcularCoste100km = (consumo: number, precioKwh: number) => consumo * precioKwh;
-  const calcularTiempoDomestica = (bateria: number, potenciaCargador: number) => potenciaCargador <= 0 ? Infinity : bateria / potenciaCargador;
 
   function actualizar() {
     const precio = parseFloat(inputPrecio.value.replace(',', '.')) || 0;
     const potencia = parseFloat(inputPotencia.value.replace(',', '.')) || 1;
 
-    const coste = calcularCoste100km(consumo, precio);
-    const tiempo = calcularTiempoDomestica(bateria, potencia);
+    const coste = consumo * precio;
+    const tiempo = potencia <= 0 ? Infinity : bateria / potencia;
 
     if (elCoste) elCoste.textContent = coste.toFixed(2);
     if (elTiempo) elTiempo.textContent = tiempo.toFixed(1);
   }
 
-  inputPrecio?.addEventListener('input', actualizar);
-  inputPotencia?.addEventListener('input', actualizar);
+  inputPrecio.addEventListener('input', actualizar);
+  inputPotencia.addEventListener('input', actualizar);
 
-  // Calcular inicial
   actualizar();
 </script>
