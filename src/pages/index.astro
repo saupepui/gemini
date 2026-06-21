@@ -11,7 +11,8 @@ import coches from '../data/coches.json';
 	<body class="bg-gray-100 p-8">
 		<main class="max-w-4xl mx-auto">
 			<h1 class="text-3xl font-bold mb-8 text-center">Nuestros Coches</h1>
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input type="text" id="buscador" placeholder="Buscar coche o marca..." class="w-full p-4 mb-8 border border-gray-300 rounded-lg shadow-sm text-lg">
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="grid-coches">
 				{coches.map((coche) => (
 					<a href={`/coches/${coche.id}`} class="bg-white p-6 rounded shadow hover:shadow-lg transition">
 						<h2 class="text-xl font-bold">{coche.marca} {coche.modelo}</h2>
@@ -21,5 +22,22 @@ import coches from '../data/coches.json';
 				))}
 			</div>
 		</main>
+        <script is:inline>
+            const buscador = document.getElementById('buscador');
+            const gridCoches = document.getElementById('grid-coches');
+            const tarjetas = gridCoches.querySelectorAll('a');
+
+            buscador.addEventListener('input', (e) => {
+                const busqueda = e.target.value.toLowerCase();
+                tarjetas.forEach((tarjeta) => {
+                    const texto = tarjeta.innerText.toLowerCase();
+                    if (texto.includes(busqueda)) {
+                        tarjeta.style.display = 'block';
+                    } else {
+                        tarjeta.style.display = 'none';
+                    }
+                });
+            });
+        </script>
 	</body>
 </html>
