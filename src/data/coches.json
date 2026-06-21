@@ -1,0 +1,18 @@
+[
+  {
+    "id": "tesla-model-3",
+    "marca": "Tesla",
+    "modelo": "Model 3",
+    "bateria_util_kwh": 57.5,
+    "consumo_medio_kwh_100km": 14.4,
+    "potencia_carga_dc_max_kw": 170
+  },
+  {
+    "id": "dacia-spring",
+    "marca": "Dacia",
+    "modelo": "Spring",
+    "bateria_util_kwh": 26.8,
+    "consumo_medio_kwh_100km": 13.9,
+    "potencia_carga_dc_max_kw": 30
+  }
+]
