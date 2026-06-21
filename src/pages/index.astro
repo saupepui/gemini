@@ -1,17 +1,24 @@
 ---
-
+import coches from '../data/coches.json';
 ---
 
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>Catálogo de Coches Eléctricos</title>
 	</head>
-	<body>
-		<h1>Astro</h1>
+	<body class="bg-gray-100 p-8">
+		<main class="max-w-4xl mx-auto">
+			<h1 class="text-3xl font-bold mb-8 text-center">Nuestros Coches</h1>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				{coches.map((coche) => (
+					<a href={`/coches/${coche.id}`} class="bg-white p-6 rounded shadow hover:shadow-lg transition">
+						<h2 class="text-xl font-bold">{coche.marca} {coche.modelo}</h2>
+						<p class="text-gray-600">Batería: {coche.bateria_util_kwh} kWh</p>
+						<p class="text-gray-600">Consumo: {coche.consumo_medio_kwh_100km} kWh/100km</p>
+					</a>
+				))}
+			</div>
+		</main>
 	</body>
 </html>
