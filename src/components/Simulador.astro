@@ -30,29 +30,31 @@ const { coche } = Astro.props;
 </div>
 
 <script>
-  import { calcularCoste100km, calcularTiempoDomestica } from '../utils/calculadoras.js';
-
   const simuladorDiv = document.getElementById('simulador');
-  const bateriaCoche = parseFloat(simuladorDiv.dataset.bateria);
-  const consumoCoche = parseFloat(simuladorDiv.dataset.consumo);
+  const bateria = parseFloat(simuladorDiv.getAttribute('data-bateria')) || 0;
+  const consumo = parseFloat(simuladorDiv.getAttribute('data-consumo')) || 0;
 
-  const inputPrecio = document.getElementById('precioKwh');
-  const inputPotencia = document.getElementById('potenciaCarga');
+  const inputPrecio = document.getElementById('precioKwh') as HTMLInputElement;
+  const inputPotencia = document.getElementById('potenciaCarga') as HTMLInputElement;
   const elCoste = document.getElementById('resultadoCoste');
   const elTiempo = document.getElementById('resultadoTiempo');
+
+  const calcularCoste100km = (consumo: number, precioKwh: number) => consumo * precioKwh;
+  const calcularTiempoDomestica = (bateria: number, potenciaCargador: number) => potenciaCargador <= 0 ? Infinity : bateria / potenciaCargador;
 
   function actualizar() {
     const precio = parseFloat(inputPrecio.value.replace(',', '.')) || 0;
     const potencia = parseFloat(inputPotencia.value.replace(',', '.')) || 1;
 
-    const coste = calcularCoste100km(consumoCoche, precio);
-    const tiempo = calcularTiempoDomestica(bateriaCoche, potencia);
+    const coste = calcularCoste100km(consumo, precio);
+    const tiempo = calcularTiempoDomestica(bateria, potencia);
 
-    elCoste.textContent = coste.toFixed(2);
-    elTiempo.textContent = tiempo.toFixed(1);
+    if (elCoste) elCoste.textContent = coste.toFixed(2);
+    if (elTiempo) elTiempo.textContent = tiempo.toFixed(1);
   }
 
-  [inputPrecio, inputPotencia].forEach(el => el.addEventListener('input', actualizar));
+  inputPrecio?.addEventListener('input', actualizar);
+  inputPotencia?.addEventListener('input', actualizar);
 
   // Calcular inicial
   actualizar();
