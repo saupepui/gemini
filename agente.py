@@ -12,7 +12,7 @@ gemini_client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 # ==========================================
-# 2. HERRAMIENTAS DEL CREADOR
+# 2. HERRAMIENTAS
 # ==========================================
 def ejecutar_comando_bash(comando: str) -> str:
     """Ejecuta un comando en la terminal bash de Linux y devuelve la salida o el error."""
@@ -68,10 +68,8 @@ mapa_funciones = {
 # ==========================================
 instrucciones_creador = (
     "Eres un programador senior autónomo. Tu única misión es escribir código y probar que funcione localmente.\n"
-    "REGLA CRÍTICA Y ABSOLUTA: Tienes ESTRICTAMENTE PROHIBIDO usar comandos de Git (ni git add, ni git commit, ni git push). "
-    "No debes gestionar el control de versiones. Cuando termines de modificar los archivos solicitados en la tarea, "
-    "simplemente da una respuesta final explicando qué archivos has modificado y finaliza tu turno. "
-    "El Departamento de QA se encargará de revisar tu código y subirlo a producción."
+    "REGLA CRÍTICA: Tienes ESTRICTAMENTE PROHIBIDO usar comandos de Git. El Departamento de QA subirá el código a producción.\n"
+    "Se te proporcionará el contexto de los archivos necesarios en la propia tarea. Úsalo para planificar tu solución y emplea la herramienta 'escribir_archivo' para aplicar los cambios."
 )
 
 print("🔍 Conectando con Google GenAI y consultando modelos...")
@@ -118,12 +116,12 @@ VEREDICTO: [APROBADO o RECHAZADO]
         )
         return respuesta.choices[0].message.content
     except Exception as e:
-        return f"EVALUACION: Fallo crítico en el motor de QA ({e}). Por seguridad, se bloquea el paso a producción.\nVEREDICTO: RECHAZADO"
+        return f"EVALUACION: Fallo crítico en QA ({e}). Bloqueo de emergencia.\nVEREDICTO: RECHAZADO"
 
 # ==========================================
 # 5. EL ORQUESTADOR (BUCLE PRINCIPAL)
 # ==========================================
-print("🤖 Mega-Fábrica Dual-Agent V2 (Google GenAI) Iniciada.")
+print("🤖 Mega-Fábrica Tri-Agent V3 (Scout + Maker + QA) Iniciada.")
 ARCHIVO_BACKLOG = "backlog.txt"
 ARCHIVO_COMPLETADAS = "tareas_completadas.txt"
 
@@ -142,36 +140,65 @@ while True:
         continue
         
     tarea_actual = tareas_pendientes[0]
-    print(f"\n==================================================")
-    print(f"🚀 FASE 1: CREADOR TRABAJANDO EN -> {tarea_actual[:60]}...")
+    print(f"\n" + "="*50)
+    print(f"🚀 INICIANDO MISIÓN -> {tarea_actual[:60]}...")
     
-    # --- CICLO DEL CREADOR (GEMINI) ---
+    # --- FASE 0: EXPLORADOR (GROQ) ---
+    print(f"\n🗺️ FASE 0: EXPLORADOR GROQ PREPARANDO CONTEXTO...")
+    estructura_actual = ver_estructura_proyecto(".")
+    prompt_scout = f"""Eres un Analista Técnico. Prepara el terreno para el programador.
+Tarea: '{tarea_actual}'
+Estructura del proyecto:
+{estructura_actual}
+¿Qué archivos existentes necesita leer el programador para hacer esto? 
+Responde SOLO con las rutas de los archivos separadas por comas. Si es un archivo nuevo o no necesita leer nada, responde NINGUNO."""
+    
+    contexto_inyectado = ""
     try:
-        response = chat.send_message(tarea_actual)
+        respuesta_scout = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt_scout}],
+            model="llama-3.3-70b-versatile",
+            temperature=0.1
+        )
+        rutas = respuesta_scout.choices[0].message.content.strip()
+        print(f"   ↳ Archivos identificados: {rutas}")
+        
+        if "NINGUNO" not in rutas.upper():
+            for ruta in rutas.split(','):
+                ruta_limpia = ruta.strip()
+                if os.path.exists(ruta_limpia) and os.path.isfile(ruta_limpia):
+                    contenido = leer_archivo(ruta_limpia)
+                    contexto_inyectado += f"\n--- Archivo: {ruta_limpia} ---\n{contenido}\n"
+                    
+        if contexto_inyectado:
+            tarea_enriquecida = f"TAREA: {tarea_actual}\n\nCONTEXTO PREVIO (Archivos del proyecto):\n{contexto_inyectado}"
+            print("   ↳ Contexto empaquetado con éxito.")
+        else:
+            tarea_enriquecida = tarea_actual
+            
+    except Exception as e:
+        print(f"⚠️ Explorador falló ({e}). Se enviará la tarea a ciegas.")
+        tarea_enriquecida = tarea_actual
+
+    # --- FASE 1: CREADOR TRABAJANDO (GEMINI) ---
+    print(f"\n🛠️ FASE 1: CREADOR TRABAJANDO...")
+    try:
+        response = chat.send_message(tarea_enriquecida)
         
         while response.function_calls:
             respuestas_herramientas = []
             for tool_call in response.function_calls:
                 func_name = tool_call.name
                 args = tool_call.args if tool_call.args else {}
-                
                 res = mapa_funciones[func_name](**args)
-                
                 respuestas_herramientas.append(
-                    types.Part.from_function_response(
-                        name=func_name,
-                        response={"resultado": res}
-                    )
+                    types.Part.from_function_response(name=func_name, response={"resultado": res})
                 )
-                
             time.sleep(10)
             response = chat.send_message(respuestas_herramientas)
             
-        try:
-            texto_final = response.text
-        except Exception:
-            texto_final = "(Sin respuesta de texto)"
-            
+        try: texto_final = response.text
+        except: texto_final = "(Sin respuesta de texto)"
         print(f"✅ Creador finalizó. Mensaje: {texto_final[:100]}...")
         
     except Exception as e:
@@ -186,9 +213,8 @@ while True:
             chat = crear_chat_creador(modelo_idx)
             continue
 
-    # --- FASE 2: INSPECTOR DE CALIDAD (QA) ---
+    # --- FASE 2: INSPECTOR DE CALIDAD (QA GROQ) ---
     print(f"\n🚀 FASE 2: INSPECCIÓN Y DESPLIEGUE")
-    
     subprocess.run("git add -A", shell=True)
     diff_check = subprocess.run("git diff --staged", shell=True, capture_output=True, text=True)
     cambios_codigo = diff_check.stdout.strip()
