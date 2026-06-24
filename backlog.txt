@@ -1,1 +1,1 @@
-Crea un archivo llamado 'hola_nuevo_motor.txt' en la raíz del proyecto. El archivo debe contener el texto: 'El SDK moderno está operativo'.
+Modifica el mensaje de bienvenida de 'src/pages/index.astro'. Haz que el diseño del contenedor <main> tenga un fondo gris muy suave (bg-gray-50) y cambia el texto del párrafo para que sea un saludo muy divertido, entusiasta y motivador para un desarrollador que usa esta fábrica.
