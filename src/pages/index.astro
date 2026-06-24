@@ -1,43 +1,16 @@
 ---
-import coches from '../data/coches.json';
 ---
 
 <html lang="es">
 	<head>
 		<meta charset="utf-8" />
-		<title>Catálogo de Coches Eléctricos</title>
+		<title>Plantilla Base Astro + Tailwind</title>
         <script is:inline src="https://cdn.tailwindcss.com"></script>
 	</head>
-	<body class="bg-gray-100 p-8">
-		<main class="max-w-4xl mx-auto">
-			<h1 class="text-3xl font-bold mb-8 text-center">Nuestros Coches</h1>
-            <input type="text" id="buscador" placeholder="Buscar coche o marca..." class="w-full p-4 mb-8 border border-gray-300 rounded-lg shadow-sm text-lg">
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="grid-coches">
-				{coches.map((coche) => (
-					<a href={`/coches/${coche.id}`} class="bg-white p-6 rounded shadow hover:shadow-lg transition">
-						<h2 class="text-xl font-bold">{coche.marca} {coche.modelo}</h2>
-						<p class="text-gray-600">Batería: {coche.bateria_util_kwh} kWh</p>
-						<p class="text-gray-600">Consumo: {coche.consumo_medio_kwh_100km} kWh/100km</p>
-					</a>
-				))}
-			</div>
+	<body class="bg-gray-100 p-8 flex items-center justify-center min-h-screen">
+		<main class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
+			<h1 class="text-4xl font-bold text-gray-800 mb-4">Plantilla Base Astro + Tailwind</h1>
+			<p class="text-gray-600 text-lg">Proyecto inicializado y listo para nuevas instrucciones del agente autónomo</p>
 		</main>
-        <script is:inline>
-            const buscador = document.getElementById('buscador');
-            const gridCoches = document.getElementById('grid-coches');
-            const tarjetas = gridCoches.querySelectorAll('a');
-
-            buscador.addEventListener('input', (e) => {
-                const busqueda = e.target.value.toLowerCase();
-                tarjetas.forEach((tarjeta) => {
-                    const texto = tarjeta.innerText.toLowerCase();
-                    if (texto.includes(busqueda)) {
-                        tarjeta.style.display = 'block';
-                    } else {
-                        tarjeta.style.display = 'none';
-                    }
-                });
-            });
-        </script>
 	</body>
 </html>
