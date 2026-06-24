@@ -121,7 +121,7 @@ VEREDICTO: [APROBADO o RECHAZADO]
 # ==========================================
 # 5. EL ORQUESTADOR (BUCLE PRINCIPAL)
 # ==========================================
-print("🤖 Mega-Fábrica Tri-Agent V3 (Scout + Maker + QA) Iniciada.")
+print("🤖 Mega-Fábrica Tri-Agent V4 (Smart Routing Operativo) Iniciada.")
 ARCHIVO_BACKLOG = "backlog.txt"
 ARCHIVO_COMPLETADAS = "tareas_completadas.txt"
 
@@ -143,8 +143,61 @@ while True:
     print(f"\n" + "="*50)
     print(f"🚀 INICIANDO MISIÓN -> {tarea_actual[:60]}...")
     
-    # --- FASE 0: EXPLORADOR (GROQ) ---
-    print(f"\n🗺️ FASE 0: EXPLORADOR GROQ PREPARANDO CONTEXTO...")
+    # --- FASE 0.1: CLASIFICADOR / ENRUTADOR (GROQ) ---
+    print(f"\n🔀 FASE 0.1: ENRUTADOR ANALIZANDO TIPO DE TRABAJO...")
+    prompt_router = f"""Analiza la siguiente tarea de desarrollo:
+Tarea: '{tarea_actual}'
+
+Determina si la tarea consiste ÚNICAMENTE en ejecutar comandos de terminal (como compilar, comprobar estados con bash, instalar librerías, lanzar tests) o si requiere escribir/modificar código en archivos.
+Responde ESTRICTAMENTE con una de estas dos palabras:
+- MICROTAREA (Si es solo ejecutar comandos bash o revisar la terminal)
+- CODIGO (Si implica crear, editar o pensar la lógica de archivos de código)"""
+    
+    es_microtarea = False
+    try:
+        respuesta_router = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt_router}],
+            model="llama-3.1-8b-instant",
+            temperature=0.0
+        )
+        tipo_tarea = respuesta_router.choices[0].message.content.strip().upper()
+        if "MICROTAREA" in tipo_tarea:
+            es_microtarea = True
+            print("   ↳ ⚡ Enrutamiento Inteligente: Detectada MICROTAREA de terminal. Asignada a Groq LLaMA-3.1.")
+        else:
+            print("   ↳ 🧠 Enrutamiento Inteligente: Tarea de CÓDIGO complejo. Asignada al arsenal de Gemini.")
+    except Exception as e:
+        print(f"   ⚠️ Falló el Enrutador ({e}). Por defecto se usará la ruta general.")
+
+    # --- CAMINO B: EJECUCIÓN DIRECTA DE MICROTAREA (GROQ ULTRA-FAST) ---
+    if es_microtarea:
+        print(f"\n⚡ FASE 1 (MICROTAREA): EJECUTOR COMPILANDO...")
+        prompt_ejecutor = f"""Eres un operador de sistemas Linux. Tu única misión es ejecutar el comando bash exacto necesario para cumplir esta tarea: '{tarea_actual}'.
+Escribe únicamente el comando bash que vas a ejecutar, envuelto en un bloque de código markdown, por ejemplo: ```bash\nnpm run build\n```. No des explicaciones."""
+        try:
+            respuesta_ejecutor = groq_client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt_ejecutor}],
+                model="llama-3.1-8b-instant",
+                temperature=0.1
+            )
+            contenido_ejecutor = respuesta_ejecutor.choices[0].message.content
+            if "```bash" in contenido_ejecutor:
+                comando_extraido = contenido_ejecutor.split("```bash")[1].split("```")[0].strip()
+                res_bash = ejecutar_comando_bash(comando_extraido)
+                print(f"   ↳ [Resultado Terminal]: {res_bash[:200]}...")
+            else:
+                print("   ⚠️ No se pudo extraer el comando limpio de Groq.")
+            
+            # Marcamos directamente como completada al ser de consola pura sin pasar por QA de código
+            with open(ARCHIVO_COMPLETADAS, 'a', encoding='utf-8') as f: f.write(tarea_actual + " (Microtarea Bash exitosa)\n")
+            with open(ARCHIVO_BACKLOG, 'w', encoding='utf-8') as f: f.writelines([l + "\n" for l in tareas_pendientes[1:]])
+            print("\n✅ Microtarea de consola finalizada. Avanzando backlog...")
+            continue
+        except Exception as e:
+            print(f"   ⚠️ Falló el ejecutor rápido ({e}). Derivando tarea al flujo principal...")
+
+    # --- CAMINO A: FLUJO COMPLEJO (SCOUT + MAKER GEMINI) ---
+    print(f"\n🗺️ FASE 0.2: EXPLORADOR GROQ PREPARANDO CONTEXTO...")
     estructura_actual = ver_estructura_proyecto(".")
     prompt_scout = f"""Eres un Analista Técnico. Prepara el terreno para el programador.
 Tarea: '{tarea_actual}'
