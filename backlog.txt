@@ -1,1 +1,0 @@
-Crea un componente en 'src/components/Footer.astro' con un pie de página sencillo y oscuro (bg-gray-800, text-white) que diga 'Desarrollado por la Mega-Fábrica Tri-Agente'. Luego importa y coloca este componente al final del <body> en 'src/pages/index.astro'.
