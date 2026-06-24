@@ -1,4 +1,5 @@
 ---
+import Footer from '../components/Footer.astro';
 ---
 <html lang="es">
 	<head>
@@ -7,14 +8,17 @@
 		<title>Plantilla Base Astro + Tailwind</title>
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
 	</head>
-	<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-		<main class="bg-gray-50 p-8 rounded-xl shadow-lg text-center max-w-md">
-			<h1 class="text-3xl font-bold text-gray-800 mb-4">¡Hola, Genio del Código! 🚀</h1>
-			<p class="text-gray-600 text-lg">
-				¡Prepárate para romperla! Estás usando la fábrica más potente del multiverso. 
-				Cada línea que escribas hoy es un paso más hacia la gloria digital. 
-				¡A programar, a crear y a conquistar el mundo, crack! 💻✨
-			</p>
+	<body class="bg-gray-100 min-h-screen flex flex-col">
+		<main class="flex-grow flex items-center justify-center">
+			<div class="bg-gray-50 p-8 rounded-xl shadow-lg text-center max-w-md">
+				<h1 class="text-3xl font-bold text-gray-800 mb-4">¡Hola, Genio del Código! 🚀</h1>
+				<p class="text-gray-600 text-lg">
+					¡Prepárate para romperla! Estás usando la fábrica más potente del multiverso. 
+					Cada línea que escribas hoy es un paso más hacia la gloria digital. 
+					¡A programar, a crear y a conquistar el mundo, crack! 💻✨
+				</p>
+			</div>
 		</main>
+		<Footer />
 	</body>
 </html>
