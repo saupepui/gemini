@@ -1,1 +1,1 @@
-Modifica el archivo 'src/pages/index.astro' y elimina completamente la etiqueta <head> y todo su contenido para que la página cargue más rápido. Guarda el archivo.
+El archivo 'src/pages/index.astro' fue destruido. Restáuralo. 1) Crea un archivo index.astro válido. 2) Añade la estructura HTML5 con el <head> correcto, incluyendo charset, meta viewport, title 'Plantilla Base Astro + Tailwind' y la etiqueta <script is:inline src="https://cdn.tailwindcss.com"></script>. 3) En el <body>, pon un <main> centrado con diseño moderno Tailwind y un mensaje de bienvenida.

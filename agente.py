@@ -91,7 +91,7 @@ def crear_chat_creador(idx, historial=[]):
 # 4. SISTEMA DE QA / INSPECTOR (GROQ)
 # ==========================================
 def evaluar_codigo_qa(tarea, git_diff):
-    print("\n🕵️‍♂️ [QA Inspector] Evaluando código con Groq LLaMA-3...")
+    print("\n🕵️‍♂️ [QA Inspector] Evaluando código con Groq LLaMA-3.3...")
     prompt_qa = f"""Eres un Ingeniero Jefe de QA. 
 El programador acaba de intentar resolver esta tarea: '{tarea}'
 
@@ -106,12 +106,13 @@ VEREDICTO: [APROBADO o RECHAZADO]
     try:
         respuesta = groq_client.chat.completions.create(
             messages=[{"role": "user", "content": prompt_qa}],
-            model="llama3-70b-8192",
+            model="llama-3.3-70b-versatile", # <--- MODELO ACTUALIZADO
             temperature=0.1
         )
         return respuesta.choices[0].message.content
     except Exception as e:
-        return f"EVALUACION: Fallo en el motor de QA ({e}). Aprobación de emergencia.\nVEREDICTO: APROBADO"
+        # <--- AHORA ES "FAIL-CLOSED" (BLOQUEO DE EMERGENCIA)
+        return f"EVALUACION: Fallo crítico en el motor de QA ({e}). Por seguridad, se bloquea el paso a producción.\nVEREDICTO: RECHAZADO"
 
 # ==========================================
 # 5. EL ORQUESTADOR (BUCLE PRINCIPAL)
