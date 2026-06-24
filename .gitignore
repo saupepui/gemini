@@ -22,3 +22,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+
+backlog.txt
+tareas_completadas.txt
+__pycache__/

@@ -214,7 +214,8 @@ while True:
             f.writelines([l + "\n" for l in tareas_pendientes[1:]])
     else:
         print("🔴 QA RECHAZÓ EL CÓDIGO. Bloqueando despliegue.")
-        subprocess.run("git reset", shell=True)
+        subprocess.run("git reset --hard", shell=True)
+        subprocess.run("git clean -fd", shell=True)
         
         feedback = reporte_qa.split('\n')[0]
         nueva_tarea = f"URGENTE (Fallo QA en tarea anterior): {feedback}. Revisa los archivos y arregla el error."
